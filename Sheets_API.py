@@ -4,6 +4,7 @@ import Market_Data
 import time
 import numpy as np
 
+
 def startup():
     serviceAccount = gspread.service_account_from_dict(credentials)
     googleSheet = serviceAccount.open("TridentResearchPlatform")

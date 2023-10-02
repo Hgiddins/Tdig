@@ -11,5 +11,6 @@ def refresh_all():
     except Exception as e:
         return jsonify(success=False, message=str(e)), 500
 
+
 if __name__ == '__main__':
     app.run(debug=True)

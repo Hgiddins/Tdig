@@ -75,19 +75,21 @@ def add_nyfed_rates(worksheet, top_left_row, top_left_col):
     worksheet.update(cell_range, data_to_write)
 
 
+
 ########################################################################################################################
 
 
-def update_sheet():  # INSERT ALL FUNCTIONS
+def update_federal_treasuries():  # INSERT ALL FUNCTIONS
     worksheet = startup()
     add_us_treasury_yields(worksheet, top_left_row=3, top_left_col=2)
     add_nyfed_rates(worksheet, top_left_row=25, top_left_col=2)
     add_brazil_treasury_yields(worksheet,top_left_row=3, top_left_col=9)
 
 
+
 if __name__ == "__main__":
     start_time = time.time()  # Record the start time
-    update_sheet()  # Call your main function
+    update_federal_treasuries()  # Call your main function
     end_time = time.time()  # Record the end time
     execution_time = end_time - start_time  # Calculate the total execution time
     print(f"Execution time: {execution_time:.2f} seconds")  # Print the execution time to 2 decimal places

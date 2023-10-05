@@ -1,7 +1,8 @@
 import requests
 
 def call_refresh_all():
-    url = "http://165.232.104.175:5000/api/refresh_all"
+    # url = "http://165.232.104.175:5000/api/refresh_all"
+    url = "http://127.0.0.1:5000/api/refresh_all"
     response = requests.post(url)
 
     if response.status_code == 200:

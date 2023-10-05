@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+from datetime import datetime
 
 
 # def US_Treasury_yield_curve_rates():
@@ -108,8 +109,14 @@ def fetch_brazil_bonds():
     return df
 
 
-def fetch_nyfed_overnight_rates():
-    URL = "https://markets.newyorkfed.org/read?productCode=50&eventCodes=505,500&limit=2&startPosition=0&sort=postDt:-1&format=json"
+def fetch_nyfed_overnight_rates(limit = 5, startdate = None ):
+
+    # startdate format must be format '2020-10-03'
+    if startdate == None:
+        URL = f"https://markets.newyorkfed.org/read?productCode=50&eventCodes=510,515,520,500,505&limit={limit}&startPosition=0&sort=postDt:-1&format=json"
+    else:
+        URL = f"https://markets.newyorkfed.org/read?startDt={startdate}&eventCodes=510,515,520,500,505&productCode=50&sort=postDt:-1,eventCode:1&format=json"
+
     response = requests.get(URL)
     if response.status_code != 200:
         response.raise_for_status()
@@ -120,25 +127,32 @@ def fetch_nyfed_overnight_rates():
     df_list = []
     if 'refRates' in data and len(data['refRates']) > 0:
         for entry in data['refRates']:
+
             effective_date = entry['effectiveDate']
             percent_rate = entry['percentRate']
-            volume = entry['volumeInBillions']
+            # volume = entry['volumeInBillions']
             rate_type = entry['type']
 
             rate_data = {
                 "Rate Type": rate_type,
-                "Rate": f"{percent_rate}%",
-                "Volume in Billions": volume,
+                "Rate": percent_rate/100,
+                # "Volume in Billions": volume,
                 "Date": effective_date
             }
             if rate_type == 'EFFR':
-                rate_data["Target (Lower Bound)"] = f"{entry['targetRateFrom']}%"
-                rate_data["Target (Upper Bound)"] = f"{entry['targetRateTo']}%"
+                rate_data["Target (Lower Bound)"] = entry['targetRateFrom']/100
+                if datetime.strptime(effective_date, '%Y-%m-%d').date() >= datetime(2016, 1, 3).date():
+                    rate_data["Target (Upper Bound)"] = entry['targetRateTo']/100
+                # else:
+                #     rate_data["Target (Upper Bound)"] = ''
+
 
             df_list.append(rate_data)
 
     # Specify the column order when creating the dataframe
-    columns_order = ["Rate Type", "Rate", "Volume in Billions", "Target (Lower Bound)", "Target (Upper Bound)", "Date"]
+    # columns_order = ["Rate Type", "Rate", "Volume in Billions", "Target (Lower Bound)", "Target (Upper Bound)", "Date"]
+    columns_order = ["Rate Type", "Rate", "Target (Lower Bound)", "Target (Upper Bound)", "Date"]
+
     df = pd.DataFrame(df_list, columns=columns_order)
     print(df)
     return df
@@ -150,7 +164,7 @@ def fetch_nyfed_overnight_rates():
 if __name__ == "__main__":
     # US_Treasury_yield_curve_rates()
     df = fetch_us_bonds()
-    fetch_nyfed_overnight_rates()
+    fetch_nyfed_overnight_rates(limit = 5, startdate='2005-10-03')
     print(df)
     df = fetch_brazil_bonds()
     print(df)
